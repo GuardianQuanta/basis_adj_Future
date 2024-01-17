@@ -226,7 +226,7 @@ if __name__ == "__main__":
                 ]
                 df_array.append(target_df)
 
-                basis_series = pd.Series(np.zeros(target_df.shape[0]),index=target_df.index )
+                basis_series = pd.Series(np.zeros(target_df.shape[0])*np.nan,index=target_df.index )
                 basis_adj_array.append(basis_series)
 
         else:
@@ -241,7 +241,7 @@ if __name__ == "__main__":
             ]
             df_array.append(target_df)
 
-            basis_series = pd.Series(np.zeros(target_df.shape[0]), index=target_df.index)
+            basis_series = pd.Series(np.zeros(target_df.shape[0])*np.nan, index=target_df.index)
             basis_adj_array.append(basis_series)
 
 
