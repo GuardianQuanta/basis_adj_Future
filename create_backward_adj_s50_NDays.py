@@ -43,7 +43,10 @@ if __name__ =="__main__":
             Holidays.values.reshape(-1)), UTC=True)
 
         df_array.append(df)
-    DF = pd.concat(df_array)
+    DF = pd.concat(df_array).sort_index()
+    DF = DF[~DF.index.duplicated(keep='first')]
+    # DF
+    print()
     DF_unadjusted,basis_diff_Array, basis_diff_Array_cumsum_reverse, = S50_tfex_roll_basis_OHLCV_QuartersOnly(DF, pd.to_datetime(Holidays.values.reshape(-1)),roll_days=3)
 
     DF_unadjusted.loc[:,['LastPrice_open','LastPrice_high','LastPrice_low','LastPrice_close','Volume_sum']].to_csv("BasisAdjFuture_check_OHLCV.csv")
