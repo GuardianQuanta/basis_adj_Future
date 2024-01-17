@@ -103,103 +103,102 @@ def S50_tfex_roll_basis_OHLCV_QuartersOnly_modular(
     DaysToExp = np.hstack(DaysToExp).astype(float)
 
     '''Check for rolling conodition'''
-    if np.any(DaysToExp[:, 0] <= min_roll_days):
-        '''Condition 1 Front exp is less than  min_roll_days'''
-        Volume_sum = QData.loc[:, idx[Expirations_in_data[:2], :, 'Volume', 'sum']]
-
-        Volume_sum_by_days_to_exp = Volume_sum.groupby(DaysToExp[:, 0]).sum()
-        Volume_sum_by_days_to_exp = Volume_sum_by_days_to_exp[Volume_sum_by_days_to_exp.index <= min_roll_days]
-
-        if len(basis_adj_array) > 0:
-            '''Checking for recent roll'''
-            last_basis = basis_adj_array[-1]
-
-            if np.any(~np.isnan(last_basis)):
-                '''If there is any basis that is not nan, there is a basis adjustment in the last iteration
-                must use second expiration'''
-                second_exp = Expirations_in_data.sort_values()[1]
-                target_df = QData.loc[:, second_exp].droplevel(0, axis=1)
-
-                target_df.columns = [
-                    col[0] + "_" + col[1]
-                    for col in target_df.columns
-                ]
-
-                basis_series = pd.Series(np.zeros(target_df.shape[0]), index=target_df.index)
-
-                df_array.append(target_df)
-                basis_adj_array.append(basis_series)
-
-                # go next
-                continue
-            else:
-                print('No recent rolling, moving on to normal case')
-                pass
-
-        if (Volume_sum_by_days_to_exp.iloc[:, 1] > Volume_sum_by_days_to_exp.iloc[:, 0]).any():
-            '''Found date that second exp volume > front exp'''
-            roll_days = Volume_sum_by_days_to_exp.index[
-                (Volume_sum_by_days_to_exp.iloc[:, 1] > Volume_sum_by_days_to_exp.iloc[:, 0])].max()
-
-            '''Geting Indices for each expirations'''
-            second_quarter_index = DaysToExp[:, 0] < roll_days
-            front_quarter_index = DaysToExp[:, 0] >= roll_days
-
-            basis_calc_index = np.where(front_quarter_index)[0][-1]
-
-            second_exp = Expirations_in_data.sort_values()[1]
-            target_df = QData.loc[:, second_exp].droplevel(0, axis=1)
-            target_df = target_df[second_quarter_index]
-
-            # if front_quarter_index[front_quarter_index].shape[0] > 0:
-            front_exp = Expirations_in_data.sort_values()[0]
-            front_target_df = QData.loc[:, front_exp].droplevel(0, axis=1)
-            front_target_df = front_target_df[front_quarter_index]
-            target_df = pd.concat([front_target_df, target_df], axis=0)
-
-            '''Calculating Basis changes to use as adjustment'''
-            basis = QData.iloc[basis_calc_index].loc[second_exp].droplevel(0, axis=0).loc[idx['LastPrice', 'close']] - \
-                    QData.iloc[basis_calc_index].loc[front_exp].droplevel(0, axis=0).loc[idx['LastPrice', 'close']]
-            basis = np.round(basis, 2)  # rounding python floating precision errors e.i. (149.9999999998)
-
-            basis_series = pd.Series(np.zeros(target_df.shape[0]) * np.nan, index=target_df.index)
-            basis_series[basis_calc_index] = basis
-
-            target_df.columns = [
-                col[0] + "_" + col[1]
-                for col in target_df.columns
-            ]
-
-            df_array.append(target_df)
-            basis_adj_array.append(basis_series)
-        else:
-            '''Does not fit our condition for rolling yet'''
-            front_exp = Expirations_in_data.sort_values()[0]
-            target_df = QData.loc[:, front_exp].droplevel(0, axis=1)
-
-            target_df.columns = [
-                col[0] + "_" + col[1]
-                for col in target_df.columns
-            ]
-            df_array.append(target_df)
-
-            basis_series = pd.Series(np.zeros(target_df.shape[0]) * np.nan, index=target_df.index)
-            basis_adj_array.append(basis_series)
-
-    else:
-        '''Does not fit our 1st condition for rolling, You'd take the front Quarter only'''
-        # print()
-        front_exp = Expirations_in_data.sort_values()[0]
-        target_df = QData.loc[:, front_exp].droplevel(0, axis=1)
-
-        target_df.columns = [
-            col[0] + "_" + col[1]
-            for col in target_df.columns
-        ]
-        df_array.append(target_df)
-
-        basis_series = pd.Series(np.zeros(target_df.shape[0]) * np.nan, index=target_df.index)
-        basis_adj_array.append(basis_series)
+    # if np.any(DaysToExp[:, 0] <= min_roll_days):
+    #     '''Condition 1 Front exp is less than  min_roll_days'''
+    #     Volume_sum = QData.loc[:, idx[Expirations_in_data[:2], :, 'Volume', 'sum']]
+    #
+    #     Volume_sum_by_days_to_exp = Volume_sum.groupby(DaysToExp[:, 0]).sum()
+    #     Volume_sum_by_days_to_exp = Volume_sum_by_days_to_exp[Volume_sum_by_days_to_exp.index <= min_roll_days]
+    #
+    #     if len(basis_adj_array) > 0:
+    #         '''Checking for recent roll'''
+    #         last_basis = basis_adj_array[-1]
+    #
+    #         if np.any(~np.isnan(last_basis)):
+    #             '''If there is any basis that is not nan, there is a basis adjustment in the last iteration
+    #             must use second expiration'''
+    #             second_exp = Expirations_in_data.sort_values()[1]
+    #             target_df = QData.loc[:, second_exp].droplevel(0, axis=1)
+    #
+    #             target_df.columns = [
+    #                 col[0] + "_" + col[1]
+    #                 for col in target_df.columns
+    #             ]
+    #
+    #             basis_series = pd.Series(np.zeros(target_df.shape[0]), index=target_df.index)
+    #
+    #             df_array.append(target_df)
+    #             basis_adj_array.append(basis_series)
+    #
+    #             # go next
+    #             continue
+    #         else:
+    #             print('No recent rolling, moving on to normal case')
+    #             pass
+    #
+    #     if (Volume_sum_by_days_to_exp.iloc[:, 1] > Volume_sum_by_days_to_exp.iloc[:, 0]).any():
+    #         '''Found date that second exp volume > front exp'''
+    #         roll_days = Volume_sum_by_days_to_exp.index[
+    #             (Volume_sum_by_days_to_exp.iloc[:, 1] > Volume_sum_by_days_to_exp.iloc[:, 0])].max()
+    #
+    #         '''Geting Indices for each expirations'''
+    #         second_quarter_index = DaysToExp[:, 0] < roll_days
+    #         front_quarter_index = DaysToExp[:, 0] >= roll_days
+    #
+    #         basis_calc_index = np.where(front_quarter_index)[0][-1]
+    #
+    #         second_exp = Expirations_in_data.sort_values()[1]
+    #         target_df = QData.loc[:, second_exp].droplevel(0, axis=1)
+    #         target_df = target_df[second_quarter_index]
+    #
+    #         # if front_quarter_index[front_quarter_index].shape[0] > 0:
+    #         front_exp = Expirations_in_data.sort_values()[0]
+    #         front_target_df = QData.loc[:, front_exp].droplevel(0, axis=1)
+    #         front_target_df = front_target_df[front_quarter_index]
+    #         target_df = pd.concat([front_target_df, target_df], axis=0)
+    #
+    #         '''Calculating Basis changes to use as adjustment'''
+    #         basis = QData.iloc[basis_calc_index].loc[second_exp].droplevel(0, axis=0).loc[idx['LastPrice', 'close']] - \
+    #                 QData.iloc[basis_calc_index].loc[front_exp].droplevel(0, axis=0).loc[idx['LastPrice', 'close']]
+    #         basis = np.round(basis, 2)  # rounding python floating precision errors e.i. (149.9999999998)
+    #
+    #         basis_series = pd.Series(np.zeros(target_df.shape[0]) * np.nan, index=target_df.index)
+    #         basis_series[basis_calc_index] = basis
+    #
+    #         target_df.columns = [
+    #             col[0] + "_" + col[1]
+    #             for col in target_df.columns
+    #         ]
+    #
+    #         df_array.append(target_df)
+    #         basis_adj_array.append(basis_series)
+    #     else:
+    #         '''Does not fit our condition for rolling yet'''
+    #         front_exp = Expirations_in_data.sort_values()[0]
+    #         target_df = QData.loc[:, front_exp].droplevel(0, axis=1)
+    #
+    #         target_df.columns = [
+    #             col[0] + "_" + col[1]
+    #             for col in target_df.columns
+    #         ]
+    #         df_array.append(target_df)
+    #
+    #         basis_series = pd.Series(np.zeros(target_df.shape[0]) * np.nan, index=target_df.index)
+    #         basis_adj_array.append(basis_series)
+    # else:
+    #     '''Does not fit our 1st condition for rolling, You'd take the front Quarter only'''
+    #     # print()
+    #     front_exp = Expirations_in_data.sort_values()[0]
+    #     target_df = QData.loc[:, front_exp].droplevel(0, axis=1)
+    #
+    #     target_df.columns = [
+    #         col[0] + "_" + col[1]
+    #         for col in target_df.columns
+    #     ]
+    #     df_array.append(target_df)
+    #
+    #     basis_series = pd.Series(np.zeros(target_df.shape[0]) * np.nan, index=target_df.index)
+    #     basis_adj_array.append(basis_series)
 
 
 if __name__ == "__main__":
